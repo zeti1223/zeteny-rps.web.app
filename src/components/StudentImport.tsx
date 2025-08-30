@@ -63,7 +63,7 @@ const StudentImport: React.FC<StudentImportProps> = ({ onImportComplete }) => {
             <textarea
               value={studentText}
               onChange={(e) => setStudentText(e.target.value)}
-              placeholder="John Doe&#10;Jane Smith&#10;Mike Johnson&#10;Sarah Williams&#10;..."
+              placeholder="John Doe\nJane Smith\nMike Johnson\nSarah Williams\n..."
               rows={6}
               className="block p-2 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               disabled={isLoading}
@@ -102,9 +102,9 @@ const StudentImport: React.FC<StudentImportProps> = ({ onImportComplete }) => {
           </div>
           
           {message && (
-            <div className={`p-3 rounded-xl font-semibold text-sm flex items-center gap-2 animate-slideIn ${
+            <div className={`p-3 rounded-xl font-semibold text-sm flex items-center gap-2 animate-slideIn ${ 
               message.includes('Error') 
-                ? 'text-red-700 bg-red-50 border-2 border-red-200' 
+                ? 'text-red-700 bg-red-50 border-2 border-red-200'
                 : 'text-green-700 bg-green-50 border-2 border-green-200'
             }`}>
               <span className="text-lg">

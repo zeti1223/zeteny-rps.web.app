@@ -4,11 +4,16 @@ A web application for managing Rock Paper Scissors tournaments between students.
 
 ## Features
 
-- **Student Import**: Import students from a newline-separated text format
-- **Student Search**: Search functionality to find and select students
-- **Match Recording**: Interface to record Rock Paper Scissors match results between two students
-- **Match Management**: View and manage all recorded matches with results history
-- **Real-time Data**: Uses Firebase Firestore for real-time data synchronization
+- **Student Import**: Import students from a newline-separated text format.
+- **Player Statistics**: A comprehensive list of all players with their match counts, status (active/eliminated), and other details.
+- **Match Recording**: Interface to record Rock Paper Scissors match results between two students.
+- **Match Management**: View and manage all recorded matches with results history.
+- **Match Deletion**: Ability to delete recorded matches.
+- **Tournament Overview**: A banner that shows the current status of the tournament, including the number of active and eliminated players.
+- **Sorting and Filtering**: Players can be sorted by name, match count, or status, and filtered by name.
+- **Responsive Design**: The application is designed to work on both desktop and mobile devices.
+- **Real-time Data**: Uses Firebase Firestore for real-time data synchronization.
+- **Tournament Bracket (Disabled)**: A visual representation of the tournament bracket is implemented but currently disabled. The README includes instructions on how to re-enable it.
 
 ## Tech Stack
 
@@ -147,7 +152,7 @@ To enable automatic deployment:
    - `VITE_FIREBASE_API_KEY`
    - `VITE_FIREBASE_AUTH_DOMAIN`
    - `VITE_FIREBASE_PROJECT_ID`
-   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBAE_STORAGE_BUCKET`
    - `VITE_FIREBASE_MESSAGING_SENDER_ID`
    - `VITE_FIREBASE_APP_ID`
    - `FIREBASE_SERVICE_ACCOUNT_KEY` (JSON key from Firebase project settings)
@@ -162,6 +167,49 @@ To enable automatic deployment:
 4. Test thoroughly
 5. Submit a pull request
 
+## How to re-enable the tournament bracket
+
+The tournament bracket has been commented out from the UI. To re-enable it, you need to uncomment the following parts in `src/App.tsx`:
+
+1.  **Mobile navigation button:**
+
+    Remove the ` {/* ` and ` */}`
+    ```tsx
+    {/*<button 
+        className={`w-full text-left px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
+        activeTab === 'flowchart' 
+            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md' 
+            : 'text-gray-700 hover:bg-gray-50'
+        }`}
+        onClick={() => handleTabChange('flowchart')}
+    >
+        🏆 Tournament Bracket
+    </button>*/}
+    ```
+
+2.  **Desktop navigation button:**
+
+    Remove the ` {/* ` and ` */}`
+    ```tsx
+    {/*<button 
+        className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
+        activeTab === 'flowchart' 
+            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md border-2 border-cyan-500' 
+            : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 shadow-sm'
+        }`}
+        onClick={() => handleTabChange('flowchart')}
+    >
+        🏆 Tournament Bracket
+    </button>*/}
+    ```
+
+3.  **Component rendering:**
+    Remove the ` {/* ` and ` */}`
+    ```tsx
+    {/*{activeTab === 'flowchart' && (
+        <MatchFlowChart key={refreshKey} />
+    )}*/}
+    ```
 ## License
 
 This project is licensed under the MIT License.

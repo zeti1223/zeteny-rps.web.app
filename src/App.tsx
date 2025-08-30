@@ -3,7 +3,6 @@ import './App.css'
 import StudentImport from './components/StudentImport.tsx'
 import MatchRecorder from './components/MatchRecorder.tsx'
 import MatchResults from './components/MatchResults.tsx'
-import MatchFlowChart from './components/MatchFlowChart.tsx'
 import PlayerList from './components/PlayerList.tsx'
 import { getTournamentStatus } from './services/firebaseService.ts'
 import type { Student } from './types.ts'
@@ -122,7 +121,7 @@ function App() {
                 >
                   🏆 View Results
                 </button>
-                <button 
+                {/*<button 
                   className={`w-full text-left px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
                     activeTab === 'flowchart' 
                       ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md' 
@@ -131,7 +130,7 @@ function App() {
                   onClick={() => handleTabChange('flowchart')}
                 >
                   🏆 Tournament Bracket
-                </button>
+                </button>*/}
                 <button 
                   className={`w-full text-left px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
                     activeTab === 'import' 
@@ -178,7 +177,7 @@ function App() {
             >
               🏆 View Results
             </button>
-            <button 
+            {/*<button 
               className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
                 activeTab === 'flowchart' 
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md border-2 border-cyan-500' 
@@ -187,7 +186,7 @@ function App() {
               onClick={() => handleTabChange('flowchart')}
             >
               🏆 Tournament Bracket
-            </button>
+            </button>*/}
             <button 
               className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
                 activeTab === 'import' 
@@ -202,7 +201,7 @@ function App() {
         </header>
 
         {/* Tournament Status Banner */}
-        {tournamentStatus && tournamentStatus.totalStudents > 0 && (
+        {tournamentStatus && tournamentStatus.totalStudents > 0 && activeTab !== 'players' && (
           <div className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-2xl shadow-lg animate-fadeIn ${
             tournamentStatus.isComplete && tournamentStatus.winner
               ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300'
@@ -256,9 +255,9 @@ function App() {
           {activeTab === 'results' && (
             <MatchResults key={refreshKey} />
           )}
-          {activeTab === 'flowchart' && (
+          {/*{activeTab === 'flowchart' && (
             <MatchFlowChart key={refreshKey} />
-          )}
+          )}*/}
         </main>
       </div>
     </div>
