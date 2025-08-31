@@ -63,7 +63,10 @@ const StudentImport: React.FC<StudentImportProps> = ({ onImportComplete }) => {
             <textarea
               value={studentText}
               onChange={(e) => setStudentText(e.target.value)}
-              placeholder="John Doe\nJane Smith\nMike Johnson\nSarah Williams\n..."
+              placeholder="Magyar Eszter Emília
+Kerekes Gergő Roland
+Bakos Kinga Szabolcs
+Bánki Máté Levente..."
               rows={6}
               className="block p-2 w-full text-sm text-gray-900 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
               disabled={isLoading}
