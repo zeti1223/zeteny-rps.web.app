@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Student, MatchResult } from '../types.ts';
-import { addMatchWithWinner, checkExistingMatch } from '../services/firebaseService.ts';
-import StudentSearch from './StudentSearch.tsx';
+import { addMatch, checkExistingMatch } from '../services/firebaseService.ts';
+import StudentSearch from './StudentSearch';
 
 interface MatchRecorderProps {
   onMatchRecorded: () => void;
@@ -96,12 +96,13 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
     setMessage('');
 
     try {
-      await addMatchWithWinner(
+      await addMatch(
         player1.id,
         player1.name,
+        player1Move!,
         player2.id,
         player2.name,
-        matchResult as MatchResult
+        player2Move!
       );
       
       setMessage('Match recorded successfully!');

@@ -55,13 +55,7 @@ const PlayerList: React.FC = () => {
     return sortOrder === 'asc' ? comparison : -comparison;
   });
 
-  const activeStudents = students.filter(s => !s.eliminated);
-  const eliminatedStudents = students.filter(s => s.eliminated);
-  const totalMatches = students.reduce((sum, student) => sum + student.matchCount, 0) / 2; // Divide by 2 since each match involves 2 players
-
-  // Calculate tournament participation percentage (students with more than 1 match)
-  const studentsWithMultipleMatches = students.filter(s => s.matchCount >= 1);
-  const participationPercentage = students.length > 0 ? (studentsWithMultipleMatches.length / students.length * 100) : 0;
+  
 
   if (isLoading) {
     return (
@@ -88,26 +82,7 @@ const PlayerList: React.FC = () => {
             Complete overview of all players and their match participation
           </p>
 
-          {/* Summary Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border-2 border-green-100">
-              <div className="text-2xl font-bold text-green-700">{activeStudents.length}</div>
-              <div className="text-sm text-green-600 font-semibold">Active Players</div>
-            </div>
-            <div className="bg-gradient-to-br from-red-50 to-pink-50 p-4 rounded-xl border-2 border-red-100">
-              <div className="text-2xl font-bold text-red-700">{eliminatedStudents.length}</div>
-              <div className="text-sm text-red-600 font-semibold">Eliminated Players</div>
-            </div>
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border-2 border-blue-100">
-              <div className="text-2xl font-bold text-blue-700">{totalMatches}</div>
-              <div className="text-sm text-blue-600 font-semibold">Total Matches</div>
-            </div>
-            <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-4 rounded-xl border-2 border-purple-100">
-              <div className="text-2xl font-bold text-purple-700">{participationPercentage.toFixed(1)}%</div>
-              <div className="text-sm text-purple-600 font-semibold">Tournament Participation</div>
-              <div className="text-xs text-purple-500 mt-1">({studentsWithMultipleMatches.length}/{students.length} with 1+ matches)</div>
-            </div>
-          </div>
+          
 
           {/* Search Field */}
           <div className="mb-6">

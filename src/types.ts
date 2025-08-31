@@ -10,6 +10,12 @@ export type GameChoice = 'rock' | 'paper' | 'scissors';
 export type GameResult = 'win' | 'lose' | 'tie';
 export type MatchResult = 'player1' | 'player2';
 
+export interface MatchStatistics {
+  wins: { [key in GameChoice]: number };
+  losses: { [key in GameChoice]: number };
+  ties: { [key in GameChoice]: number };
+}
+
 export interface Match {
   id: string;
   player1Id: string;

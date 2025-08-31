@@ -429,3 +429,31 @@ export const subscribeToAllStudentsWithMatchCounts = (
     matchesUnsubscribe();
   };
 };
+
+export const getMatchStatistics = async (): Promise<any> => {
+  const matches = await getMatches();
+  const stats = {
+    wins: { rock: 0, paper: 0, scissors: 0 },
+    losses: { rock: 0, paper: 0, scissors: 0 },
+    ties: { rock: 0, paper: 0, scissors: 0 },
+  };
+
+  for (const match of matches) {
+    if (match.result === 'tie') {
+      if (match.player1Choice) {
+        stats.ties[match.player1Choice]++;
+      }
+    } else if (match.result === 'win') {
+      const winnerChoice = match.winner === match.player1Name ? match.player1Choice : match.player2Choice;
+      const loserChoice = match.winner === match.player1Name ? match.player2Choice : match.player1Choice;
+      if (winnerChoice) {
+        stats.wins[winnerChoice]++;
+      }
+      if (loserChoice) {
+        stats.losses[loserChoice]++;
+      }
+    }
+  }
+
+  return stats;
+};

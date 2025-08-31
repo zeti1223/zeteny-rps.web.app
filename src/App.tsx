@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
 import './App.css'
-import StudentImport from './components/StudentImport.tsx'
-import MatchRecorder from './components/MatchRecorder.tsx'
-import MatchResults from './components/MatchResults.tsx'
-import PlayerList from './components/PlayerList.tsx'
+import StudentImport from './components/StudentImport'
+import MatchRecorder from './components/MatchRecorder'
+import MatchResults from './components/MatchResults'
+import { MatchStatistics } from './components/MatchStatistics';
+import PlayerList from './components/PlayerList'
 import { getTournamentStatus } from './services/firebaseService.ts'
 import type { Student } from './types.ts'
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'import' | 'record' | 'results' | 'flowchart' | 'players'>('record')
+  const [activeTab, setActiveTab] = useState<'import' | 'record' | 'results' | 'flowchart' | 'players' | 'statistics'>('record')
   const [refreshKey, setRefreshKey] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [tournamentStatus, setTournamentStatus] = useState<{
@@ -42,7 +43,7 @@ function App() {
     // Stay on the current tab instead of redirecting to results
   }
 
-  const handleTabChange = (tab: 'import' | 'record' | 'results' | 'flowchart' | 'players') => {
+  const handleTabChange = (tab: 'import' | 'record' | 'results' | 'flowchart' | 'players' | 'statistics') => {
     setActiveTab(tab)
     setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
   }
@@ -83,6 +84,7 @@ function App() {
                 {activeTab === 'results' && '🏆 View Results'}
                 {activeTab === 'flowchart' && '🏆 Tournament Bracket'}
                 {activeTab === 'import' && '📥 Import Students'}
+                {activeTab === 'statistics' && '📊 Statistics'}
               </div>
             </div>
             
@@ -120,6 +122,16 @@ function App() {
                   onClick={() => handleTabChange('results')}
                 >
                   🏆 View Results
+                </button>
+                <button 
+                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                    activeTab === 'statistics' 
+                      ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-md' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => handleTabChange('statistics')}
+                >
+                  📊 Statistics
                 </button>
                 {/*<button 
                   className={`w-full text-left px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
@@ -177,6 +189,16 @@ function App() {
             >
               🏆 View Results
             </button>
+            <button 
+              className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                activeTab === 'statistics' 
+                  ? 'bg-gradient-to-r from-yellow-500 to-yellow-600 text-white shadow-md border-2 border-yellow-500' 
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 shadow-sm'
+              }`}
+              onClick={() => handleTabChange('statistics')}
+            >
+              📊 Statistics
+            </button>
             {/*<button 
               className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
                 activeTab === 'flowchart' 
@@ -201,7 +223,7 @@ function App() {
         </header>
 
         {/* Tournament Status Banner */}
-        {tournamentStatus && tournamentStatus.totalStudents > 0 && activeTab !== 'players' && (
+        {tournamentStatus && tournamentStatus.totalStudents > 0 && activeTab !== 'statistics' && (
           <div className={`mb-4 sm:mb-6 p-3 sm:p-4 rounded-2xl shadow-lg animate-fadeIn ${
             tournamentStatus.isComplete && tournamentStatus.winner
               ? 'bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-300'
@@ -254,6 +276,9 @@ function App() {
           )}
           {activeTab === 'results' && (
             <MatchResults key={refreshKey} />
+          )}
+          {activeTab === 'statistics' && (
+            <MatchStatistics />
           )}
           {/*{activeTab === 'flowchart' && (
             <MatchFlowChart key={refreshKey} />

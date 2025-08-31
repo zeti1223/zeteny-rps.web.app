@@ -5,12 +5,12 @@ A web application for managing Rock Paper Scissors tournaments between students.
 ## Features
 
 - **Student Import**: Import students from a newline-separated text format.
-- **Player Statistics**: A comprehensive list of all players with their match counts, status (active/eliminated), and other details.
-- **Match Recording**: Interface to record Rock Paper Scissors match results between two students.
-- **Match Management**: View and manage all recorded matches with results history.
-- **Match Deletion**: Ability to delete recorded matches.
-- **Tournament Overview**: A banner that shows the current status of the tournament, including the number of active and eliminated players.
-- **Sorting and Filtering**: Players can be sorted by name, match count, or status, and filtered by name.
+- **Player Management**: A comprehensive list of all players with their match counts, status (active/eliminated), and other details. Players can be sorted by name, match count, or status, and filtered by name.
+- **Match Recording**: Interface to record Rock Paper Scissors match results between two students, including their choices (Rock, Paper, or Scissors).
+- **Match History**: View and manage all recorded matches with results history.
+- **Match Deletion**: Ability to delete recorded matches, which also reverts the elimination of the losing player.
+- **Match Statistics**: View statistics on wins, losses, and ties for each choice (Rock, Paper, Scissors).
+- **Tournament Overview**: A banner that shows the current status of the tournament, including the number of active and eliminated players, and the tournament winner.
 - **Responsive Design**: The application is designed to work on both desktop and mobile devices.
 - **Real-time Data**: Uses Firebase Firestore for real-time data synchronization.
 - **Tournament Bracket (Disabled)**: A visual representation of the tournament bracket is implemented but currently disabled. The README includes instructions on how to re-enable it.
