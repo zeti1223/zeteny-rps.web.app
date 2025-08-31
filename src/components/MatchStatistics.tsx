@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getMatchStatistics, subscribeToAllStudentsWithMatchCounts } from '../services/firebaseService';
 import type { MatchStatistics as MatchStatisticsType, Student } from '../types';
 
@@ -6,26 +6,38 @@ export const MatchStatistics = () => {
   const [stats, setStats] = useState<MatchStatisticsType | null>(null);
   const [students, setStudents] = useState<(Student & { matchCount: number })[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStats = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const statistics = await getMatchStatistics();
+      setStats(statistics);
+    } catch (err) {
+      console.error("Error fetching match statistics:", err);
+      setError('Failed to load match statistics.');
+    }
+    // We don't set loading to false here because the subscription will do it.
+  }, []);
 
   useEffect(() => {
-    const fetchAllData = async () => {
-      try {
-        const statistics = await getMatchStatistics();
-        setStats(statistics);
-      } catch (error) {
-        console.error("Error fetching match statistics:", error);
+    fetchStats();
+
+    const unsubscribe = subscribeToAllStudentsWithMatchCounts(
+      (studentsWithCounts) => {
+        setStudents(studentsWithCounts);
+        setLoading(false);
       }
-    };
-
-    const unsubscribe = subscribeToAllStudentsWithMatchCounts((studentsWithCounts) => {
-      setStudents(studentsWithCounts);
-      setLoading(false);
-    });
-
-    fetchAllData();
+    );
 
     return () => unsubscribe();
-  }, []);
+  }, [fetchStats]);
+
+  const handleRefresh = () => {
+    // Re-fetch the stats, the subscription will handle the student list update
+    fetchStats();
+  };
 
   const activeStudents = students.filter(s => !s.eliminated);
   const eliminatedStudents = students.filter(s => s.eliminated);
@@ -45,11 +57,30 @@ export const MatchStatistics = () => {
         </div>
     );
   }
+  
+  if (error) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-xl p-6">
+          <div className="text-center">
+            <div className="text-3xl mb-3">❌</div>
+            <div className="text-red-700 bg-red-50 border-2 border-red-200 p-3 rounded-xl font-semibold text-sm">{error}</div>
+             <button 
+              onClick={handleRefresh}
+              className="mt-4 px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold text-sm rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-purple-200 flex items-center gap-2 mx-auto"
+            >
+              🔄 Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto">
       <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-xl p-4 sm:p-6">
-        <div className="text-center mb-6">
+        <div className="text-center mb-5">
           <div className="text-3xl sm:text-4xl mb-2">📊</div>
           <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-1">
             Tournament Statistics
@@ -58,6 +89,23 @@ export const MatchStatistics = () => {
             A detailed overview of the tournament progress and game statistics.
           </p>
         </div>
+        
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mb-6">
+            <div className="text-base font-semibold text-gray-700">
+              {students.length} {students.length === 1 ? 'Player' : 'Players'}
+            </div>
+            <button 
+              onClick={handleRefresh}
+              disabled={loading}
+              className="px-4 py-2 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold text-sm rounded-xl hover:from-blue-600 hover:to-cyan-600 transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-blue-200 flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                '🔄 Refresh Stats'
+              )}
+            </button>
+          </div>
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -98,7 +146,7 @@ export const MatchStatistics = () => {
                 <ul className="space-y-2">
                   <li className="flex justify-between items-center"><span>🪨 Rock</span> <span className="font-bold text-red-600">{stats.losses.rock}</span></li>
                   <li className="flex justify-between items-center"><span>📄 Paper</span> <span className="font-bold text-red-600">{stats.losses.paper}</span></li>
-                  <li className="flex justify-between items-center"><span>✂️ Scissors</span> <span className="font-bold text-red-600">{stats.losses.scissors}</span></li>
+                  <li className="flex justify-between items.center"><span>✂️ Scissors</span> <span className="font-bold text-red-600">{stats.losses.scissors}</span></li>
                 </ul>
               </div>
               
