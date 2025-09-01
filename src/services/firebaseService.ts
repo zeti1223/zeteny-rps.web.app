@@ -148,28 +148,27 @@ export const addMatch = async (
   player2Id: string,
   player2Name: string,
   player2Choice: GameChoice,
-  result: GameResult
 ): Promise<string> => {
   // Check if these players have already played against each other
   const existingMatch = await checkExistingMatch(player1Id, player2Id);
   if (existingMatch) {
     throw new Error(`${player1Name} and ${player2Name} have already played against each other.`);
   }
-  
+
   // Check if either player is already eliminated
   const students = await getStudents();
   const player1 = students.find(s => s.id === player1Id);
   const player2 = students.find(s => s.id === player2Id);
-  
+
   if (player1?.eliminated) {
     throw new Error(`${player1Name} has already been eliminated from the tournament.`);
   }
   if (player2?.eliminated) {
     throw new Error(`${player2Name} has already been eliminated from the tournament.`);
   }
-  
-  const gameResult = result === 'tie' ? { result: 'tie' } : determineGameResult(player1Choice, player2Choice);
-  
+
+  const gameResult = determineGameResult(player1Choice, player2Choice);
+
   const matchData: any = {
     player1Id,
     player1Name,
@@ -186,16 +185,16 @@ export const addMatch = async (
   }
 
   const docRef = await addDoc(matchesCollection, matchData);
-  
+
   // Eliminate the loser (but not in case of a tie)
-  if (gameResult.result !== 'tie') {
+  if (gameResult.result !== 'tie' && gameResult.winner) {
     if (gameResult.winner === 'player1') {
       await eliminateStudent(player2Id);
     } else {
       await eliminateStudent(player1Id);
     }
   }
-  
+
   return docRef.id;
 };
 

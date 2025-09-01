@@ -82,17 +82,17 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
 
   const handleSubmit = async (e: React.FormEvent, isDrawSubmit: boolean = false) => {
     e.preventDefault();
-    
+
     if (!player1 || !player2) {
       setMessage('Please select both players');
       return;
     }
-    
+
     if (player1.id === player2.id) {
       setMessage('Please select two different players');
       return;
     }
-    
+
     if (!matchResult && !isDrawSubmit) {
       setMessage('Please select moves for both players');
       return;
@@ -109,17 +109,16 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
         player2.id,
         player2.name,
         player2Move!,
-        isDrawSubmit ? 'tie' : 'win'
       );
-      
+
       setMessage('Match recorded successfully!');
-      
+
       setPlayer1(null);
       setPlayer2(null);
       setPlayer1Move(null);
       setPlayer2Move(null);
       setMatchResult('');
-      
+
       onMatchRecorded();
     } catch (error) {
       setMessage('Error recording match: ' + (error as Error).message);
@@ -162,8 +161,8 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
                 </div>
                 <h3 className="text-lg font-bold text-blue-800">Player 1</h3>
               </div>
-              
-              <StudentSearch 
+
+              <StudentSearch
                 onStudentSelect={(student) => { setPlayer1(student); setPlayer1Move(null); setMatchResult(''); }}
                 placeholder="Search for Player 1..."
                 selectedStudent={player1}
@@ -198,8 +197,8 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
                 </div>
                 <h3 className="text-lg font-bold text-red-800">Player 2</h3>
               </div>
-              
-              <StudentSearch 
+
+              <StudentSearch
                 onStudentSelect={(student) => { setPlayer2(student); setPlayer2Move(null); setMatchResult(''); }}
                 placeholder="Search for Player 2..."
                 selectedStudent={player2}
@@ -257,8 +256,8 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-gray-100">
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={(e) => handleSubmit(e, false)}
               disabled={isLoading || !player1 || !player2 || !matchResult || hasPlayedBefore || checkingMatch}
               className={`flex-1 px-6 py-3 text-white font-bold text-base rounded-xl disabled:cursor-not-allowed transform transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center gap-2 ${hasPlayedBefore 
@@ -306,10 +305,10 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
                 )}
               </button>
             )}
-            
-            <button 
-              type="button" 
-              onClick={reset} 
+
+            <button
+              type="button"
+              onClick={reset}
               disabled={isLoading}
               className="px-4 py-3 bg-gray-100 text-gray-600 font-semibold text-base rounded-xl hover:bg-gray-200 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 flex items-center justify-center gap-2"
             >
