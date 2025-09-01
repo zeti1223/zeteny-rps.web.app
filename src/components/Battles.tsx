@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Match } from '../types.ts';
 import { getMatches, deleteMatch } from '../services/firebaseService.ts';
 
-const MatchResults: React.FC = () => {
+const Battles: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -304,4 +304,4 @@ const MatchResults: React.FC = () => {
   );
 };
 
-export default MatchResults;
+export default Battles;

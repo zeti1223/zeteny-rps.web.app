@@ -1,26 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import type { Student } from '../types.ts';
-import { subscribeToStudentsWithMatchCounts } from '../services/firebaseService.ts';
+import { subscribeToActiveStudentsWithMatchAndWinCounts } from '../services/firebaseService.ts';
 
 interface StudentSearchProps {
   onStudentSelect: (student: Student) => void;
   placeholder?: string;
   selectedStudent?: Student | null;
+  filterByWinCount?: number;
 }
 
 const StudentSearch: React.FC<StudentSearchProps> = ({ 
   onStudentSelect, 
   placeholder = "Search for a student...",
-  selectedStudent
+  selectedStudent,
+  filterByWinCount
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [students, setStudents] = useState<(Student & { matchCount: number })[]>([]);
-  const [filteredStudents, setFilteredStudents] = useState<(Student & { matchCount: number })[]>([]);
+  const [students, setStudents] = useState<(Student & { matchCount: number; winCount: number })[]>([]);
+  const [filteredStudents, setFilteredStudents] = useState<(Student & { matchCount: number; winCount: number })[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = subscribeToStudentsWithMatchCounts((studentsWithCounts) => {
+    const unsubscribe = subscribeToActiveStudentsWithMatchAndWinCounts((studentsWithCounts) => {
       setStudents(studentsWithCounts);
       setIsLoading(false);
     });
@@ -39,30 +41,40 @@ const StudentSearch: React.FC<StudentSearchProps> = ({
     setSearchTerm(value);
     setShowDropdown(true);
 
+    let filtered = students;
+
+    if (filterByWinCount !== undefined) {
+      filtered = filtered.filter(student => student.winCount === filterByWinCount);
+    }
+
     if (value.trim() === '') {
-      setFilteredStudents(students.slice(0, 10));
+      setFilteredStudents(filtered.slice(0, 10));
       return;
     }
 
     // Filter from loaded students with match counts
-    const filtered = students.filter(student => 
+    filtered = filtered.filter(student => 
       student.name.toLowerCase().includes(value.toLowerCase())
     ).slice(0, 10);
     
     setFilteredStudents(filtered);
   };
 
+  const handleFocus = () => {
+    setShowDropdown(true);
+    let filtered = students;
+    if (filterByWinCount !== undefined) {
+      filtered = filtered.filter(student => student.winCount === filterByWinCount);
+    }
+    if (searchTerm === '') {
+      setFilteredStudents(filtered.slice(0, 10));
+    }
+  };
+
   const handleStudentSelect = (student: Student) => {
     setSearchTerm(student.name);
     setShowDropdown(false);
     onStudentSelect(student);
-  };
-
-  const handleFocus = () => {
-    setShowDropdown(true);
-    if (searchTerm === '') {
-      setFilteredStudents(students.slice(0, 10));
-    }
   };
 
   const handleBlur = () => {
@@ -104,11 +116,19 @@ const StudentSearch: React.FC<StudentSearchProps> = ({
                   <span className="text-blue-500">👤</span>
                   <span className="font-medium text-gray-800">{student.name}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">⚔️</span>
-                  <span className="text-sm font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                    {student.matchCount}
-                  </span>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-green-500">🏆</span>
+                    <span className="text-sm font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                      {student.winCount}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-500">⚔️</span>
+                    <span className="text-sm font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                      {student.matchCount}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}

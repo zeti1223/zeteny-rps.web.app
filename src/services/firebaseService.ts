@@ -147,7 +147,8 @@ export const addMatch = async (
   player1Choice: GameChoice,
   player2Id: string,
   player2Name: string,
-  player2Choice: GameChoice
+  player2Choice: GameChoice,
+  result: GameResult
 ): Promise<string> => {
   // Check if these players have already played against each other
   const existingMatch = await checkExistingMatch(player1Id, player2Id);
@@ -167,9 +168,9 @@ export const addMatch = async (
     throw new Error(`${player2Name} has already been eliminated from the tournament.`);
   }
   
-  const gameResult = determineGameResult(player1Choice, player2Choice);
+  const gameResult = result === 'tie' ? { result: 'tie' } : determineGameResult(player1Choice, player2Choice);
   
-  const docRef = await addDoc(matchesCollection, {
+  const matchData: any = {
     player1Id,
     player1Name,
     player1Choice,
@@ -177,9 +178,14 @@ export const addMatch = async (
     player2Name,
     player2Choice,
     result: gameResult.result,
-    winner: gameResult.winner === 'player1' ? player1Name : gameResult.winner === 'player2' ? player2Name : undefined,
-    createdAt: Timestamp.now()
-  });
+    createdAt: Timestamp.now(),
+  };
+
+  if (gameResult.winner) {
+    matchData.winner = gameResult.winner === 'player1' ? player1Name : player2Name;
+  }
+
+  const docRef = await addDoc(matchesCollection, matchData);
   
   // Eliminate the loser (but not in case of a tie)
   if (gameResult.result !== 'tie') {
@@ -336,6 +342,12 @@ export const getStudentMatchCount = async (studentId: string): Promise<number> =
   return snapshot1.docs.length + snapshot2.docs.length;
 };
 
+export const getStudentWinCount = async (studentName: string): Promise<number> => {
+  const q = query(matchesCollection, where('winner', '==', studentName));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.length;
+};
+
 export const getStudentsWithMatchCounts = async (): Promise<(Student & { matchCount: number })[]> => {
   const students = await getActiveStudents();
   const studentsWithCounts = await Promise.all(
@@ -353,6 +365,30 @@ export const getAllStudentsWithMatchCounts = async (): Promise<(Student & { matc
     students.map(async (student) => ({
       ...student,
       matchCount: await getStudentMatchCount(student.id)
+    }))
+  );
+  return studentsWithCounts;
+};
+
+export const getAllStudentsWithMatchAndWinCounts = async (): Promise<(Student & { matchCount: number; winCount: number })[]> => {
+  const students = await getStudents(); // Get ALL students, not just active ones
+  const studentsWithCounts = await Promise.all(
+    students.map(async (student) => ({
+      ...student,
+      matchCount: await getStudentMatchCount(student.id),
+      winCount: await getStudentWinCount(student.name),
+    }))
+  );
+  return studentsWithCounts;
+};
+
+export const getActiveStudentsWithMatchAndWinCounts = async (): Promise<(Student & { matchCount: number; winCount: number })[]> => {
+  const students = await getActiveStudents();
+  const studentsWithCounts = await Promise.all(
+    students.map(async (student) => ({
+      ...student,
+      matchCount: await getStudentMatchCount(student.id),
+      winCount: await getStudentWinCount(student.name),
     }))
   );
   return studentsWithCounts;
@@ -419,6 +455,78 @@ export const subscribeToAllStudentsWithMatchCounts = (
         callback(studentsWithCounts);
       } catch (error) {
         console.error('Error in matches subscription for all students:', error);
+      }
+    }
+  );
+
+  // Return combined unsubscribe function
+  return () => {
+    studentsUnsubscribe();
+    matchesUnsubscribe();
+  };
+};
+
+export const subscribeToAllStudentsWithMatchAndWinCounts = (
+  callback: (students: (Student & { matchCount: number; winCount: number })[]) => void
+) => {
+  // Listen to students collection changes
+  const studentsUnsubscribe = onSnapshot(
+    query(studentsCollection, orderBy('name')),
+    async () => {
+      try {
+        const studentsWithCounts = await getAllStudentsWithMatchAndWinCounts();
+        callback(studentsWithCounts);
+      } catch (error) {
+        console.error('Error in all students subscription:', error);
+      }
+    }
+  );
+
+  // Listen to matches collection changes
+  const matchesUnsubscribe = onSnapshot(
+    query(matchesCollection, orderBy('createdAt', 'desc')),
+    async () => {
+      try {
+        const studentsWithCounts = await getAllStudentsWithMatchAndWinCounts();
+        callback(studentsWithCounts);
+      } catch (error) {
+        console.error('Error in matches subscription for all students:', error);
+      }
+    }
+  );
+
+  // Return combined unsubscribe function
+  return () => {
+    studentsUnsubscribe();
+    matchesUnsubscribe();
+  };
+};
+
+export const subscribeToActiveStudentsWithMatchAndWinCounts = (
+  callback: (students: (Student & { matchCount: number; winCount: number })[]) => void
+) => {
+  // Listen to students collection changes
+  const studentsUnsubscribe = onSnapshot(
+    query(studentsCollection, orderBy('name')),
+    async () => {
+      try {
+        const studentsWithCounts = await getActiveStudentsWithMatchAndWinCounts();
+        callback(studentsWithCounts);
+      } catch (error) {
+        console.error('Error in active students subscription:', error);
+      }
+    }
+  );
+
+  // Listen to matches collection changes
+  const matchesUnsubscribe = onSnapshot(
+    query(matchesCollection, orderBy('createdAt', 'desc')),
+    async () => {
+      try {
+        const studentsWithCounts = await getActiveStudentsWithMatchAndWinCounts();
+        callback(studentsWithCounts);
+      } catch (error) {
+        console.error('Error in matches subscription for active students:', error);
       }
     }
   );

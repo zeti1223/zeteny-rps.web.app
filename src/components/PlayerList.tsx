@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import type { Student } from '../types.ts';
-import { subscribeToAllStudentsWithMatchCounts } from '../services/firebaseService.ts';
+import { subscribeToAllStudentsWithMatchAndWinCounts } from '../services/firebaseService.ts';
 
 const PlayerList: React.FC = () => {
-  const [students, setStudents] = useState<(Student & { matchCount: number })[]>([]);
+  const [students, setStudents] = useState<(Student & { matchCount: number; winCount: number })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<'name' | 'matches' | 'status'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    const unsubscribe = subscribeToAllStudentsWithMatchCounts((studentsWithCounts) => {
+    const unsubscribe = subscribeToAllStudentsWithMatchAndWinCounts((studentsWithCounts) => {
       setStudents(studentsWithCounts);
       setIsLoading(false);
     });
@@ -212,14 +212,22 @@ const PlayerList: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="text-right">
-                    <div className={`text-2xl font-bold ${
-                      student.eliminated ? 'text-gray-400' : 'text-blue-700'
-                    }`}>
-                      {student.matchCount}
+                  <div className="text-right flex items-center gap-4">
+                    <div className="text-right">
+                      <div className={`text-2xl font-bold text-green-600`}>
+                        {student.winCount}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {student.winCount === 1 ? 'Win' : 'Wins'}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-600">
-                      {student.matchCount === 1 ? 'Match' : 'Matches'}
+                    <div className="text-right">
+                      <div className={`text-2xl font-bold ${student.eliminated ? 'text-gray-400' : 'text-blue-700'}`}>
+                        {student.matchCount}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {student.matchCount === 1 ? 'Match' : 'Matches'}
+                      </div>
                     </div>
                   </div>
                 </div>

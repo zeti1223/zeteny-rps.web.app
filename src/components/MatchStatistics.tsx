@@ -2,6 +2,24 @@ import { useEffect, useState, useCallback } from 'react';
 import { getMatchStatistics, subscribeToAllStudentsWithMatchCounts } from '../services/firebaseService';
 import type { MatchStatistics as MatchStatisticsType, Student } from '../types';
 
+// A new component for displaying stats in a consistent card format
+const StatsCard = ({ title, value, subValue, color }: { title: string, value: string | number, subValue?: string, color: 'green' | 'red' | 'blue' | 'purple' }) => {
+  const colorClasses = {
+    green: 'from-green-50 to-emerald-50 border-green-100 text-green-700',
+    red: 'from-red-50 to-pink-50 border-red-100 text-red-700',
+    blue: 'from-blue-50 to-indigo-50 border-blue-100 text-blue-700',
+    purple: 'from-purple-50 to-violet-50 border-purple-100 text-purple-700',
+  };
+
+  return (
+    <div className={`bg-gradient-to-br p-4 rounded-xl border-2 ${colorClasses[color]}`}>
+      <div className="text-2xl font-bold">{value}</div>
+      <div className={`text-sm font-semibold`}>{title}</div>
+      {subValue && <div className="text-xs mt-1">{subValue}</div>}
+    </div>
+  );
+};
+
 export const MatchStatistics = () => {
   const [stats, setStats] = useState<MatchStatisticsType | null>(null);
   const [students, setStudents] = useState<(Student & { matchCount: number })[]>([]);
@@ -109,47 +127,49 @@ export const MatchStatistics = () => {
 
         {/* Summary Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border-2 border-green-100">
-            <div className="text-2xl font-bold text-green-700">{activeStudents.length}</div>
-            <div className="text-sm text-green-600 font-semibold">Active Players</div>
-          </div>
-          <div className="bg-gradient-to-br from-red-50 to-pink-50 p-4 rounded-xl border-2 border-red-100">
-            <div className="text-2xl font-bold text-red-700">{eliminatedStudents.length}</div>
-            <div className="text-sm text-red-600 font-semibold">Eliminated Players</div>
-          </div>
-          <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border-2 border-blue-100">
-            <div className="text-2xl font-bold text-blue-700">{totalMatches}</div>
-            <div className="text-sm text-blue-600 font-semibold">Total Matches</div>
-          </div>
-          <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-4 rounded-xl border-2 border-purple-100">
-            <div className="text-2xl font-bold text-purple-700">{participationPercentage.toFixed(1)}%</div>
-            <div className="text-sm text-purple-600 font-semibold">Tournament Participation</div>
-            <div className="text-xs text-purple-500 mt-1">({studentsWithMultipleMatches.length}/{students.length} with 1+ matches)</div>
-          </div>
+          <StatsCard title="Active Players" value={activeStudents.length} color="green" />
+          <StatsCard title="Eliminated Players" value={eliminatedStudents.length} color="red" />
+          <StatsCard title="Total Matches" value={totalMatches} color="blue" />
+          <StatsCard 
+            title="Participation" 
+            value={`${participationPercentage.toFixed(1)}%`}
+            subValue={`(${studentsWithMultipleMatches.length}/${students.length} with 1+ matches)`}
+            color="purple" 
+          />
         </div>
 
         {/* Match Choice Statistics */}
         {stats && (
           <div className="mt-8">
             <h3 className="text-lg font-bold text-center mb-4 text-gray-700">Game Choice Statistics</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-gray-50 rounded-lg border">
-                <h4 className="font-bold text-center text-lg mb-2">Wins</h4>
-                <ul className="space-y-2">
-                  <li className="flex justify-between items-center"><span>🪨 Rock</span> <span className="font-bold text-green-600">{stats.wins.rock}</span></li>
-                  <li className="flex justify-between items-center"><span>📄 Paper</span> <span className="font-bold text-green-600">{stats.wins.paper}</span></li>
-                  <li className="flex justify-between items-center"><span>✂️ Scissors</span> <span className="font-bold text-green-600">{stats.wins.scissors}</span></li>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Wins */}
+              <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-100">
+                <h4 className="font-bold text-center text-lg mb-2 text-green-700">Wins</h4>
+                <ul className="space-y-2 text-sm text-green-600 font-semibold">
+                  <li className="flex justify-between items-center"><span>🪨 Rock</span> <span className="font-bold text-xl">{stats.wins.rock}</span></li>
+                  <li className="flex justify-between items-center"><span>📄 Paper</span> <span className="font-bold text-xl">{stats.wins.paper}</span></li>
+                  <li className="flex justify-between items-center"><span>✂️ Scissors</span> <span className="font-bold text-xl">{stats.wins.scissors}</span></li>
                 </ul>
               </div>
-              <div className="p-4 bg-gray-50 rounded-lg border">
-                <h4 className="font-bold text-center text-lg mb-2">Losses</h4>
-                <ul className="space-y-2">
-                  <li className="flex justify-between items-center"><span>🪨 Rock</span> <span className="font-bold text-red-600">{stats.losses.rock}</span></li>
-                  <li className="flex justify-between items-center"><span>📄 Paper</span> <span className="font-bold text-red-600">{stats.losses.paper}</span></li>
-                  <li className="flex justify-between items.center"><span>✂️ Scissors</span> <span className="font-bold text-red-600">{stats.losses.scissors}</span></li>
+              {/* Losses */}
+              <div className="p-4 bg-gradient-to-br from-red-50 to-pink-50 rounded-xl border-2 border-red-100">
+                <h4 className="font-bold text-center text-lg mb-2 text-red-700">Losses</h4>
+                <ul className="space-y-2 text-sm text-red-600 font-semibold">
+                  <li className="flex justify-between items-center"><span>🪨 Rock</span> <span className="font-bold text-xl">{stats.losses.rock}</span></li>
+                  <li className="flex justify-between items-center"><span>📄 Paper</span> <span className="font-bold text-xl">{stats.losses.paper}</span></li>
+                  <li className="flex justify-between items-center"><span>✂️ Scissors</span> <span className="font-bold text-xl">{stats.losses.scissors}</span></li>
                 </ul>
               </div>
-              
+              {/* Draws */}
+              <div className="p-4 bg-gradient-to-br from-gray-50 to-slate-50 rounded-xl border-2 border-gray-100">
+                <h4 className="font-bold text-center text-lg mb-2 text-gray-700">Draws</h4>
+                <ul className="space-y-2 text-sm text-gray-600 font-semibold">
+                  <li className="flex justify-between items-center"><span>🪨 Rock</span> <span className="font-bold text-xl">{stats.ties.rock}</span></li>
+                  <li className="flex justify-between items-center"><span>📄 Paper</span> <span className="font-bold text-xl">{stats.ties.paper}</span></li>
+                  <li className="flex justify-between items-center"><span>✂️ Scissors</span> <span className="font-bold text-xl">{stats.ties.scissors}</span></li>
+                </ul>
+              </div>
             </div>
           </div>
         )}

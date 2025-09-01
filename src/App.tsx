@@ -2,14 +2,15 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import StudentImport from './components/StudentImport'
 import MatchRecorder from './components/MatchRecorder'
-import MatchResults from './components/MatchResults'
+import Battles from './components/Battles.tsx'
 import { MatchStatistics } from './components/MatchStatistics';
 import PlayerList from './components/PlayerList'
+import Leaderboard from './components/Leaderboard';
 import { getTournamentStatus } from './services/firebaseService.ts'
 import type { Student } from './types.ts'
 
 function App() {
-  const [activeTab, setActiveTab] = useState<'import' | 'record' | 'results' | 'flowchart' | 'players' | 'statistics'>('record')
+  const [activeTab, setActiveTab] = useState<'import' | 'record' | 'results' | 'flowchart' | 'players' | 'statistics' | 'leaderboard'>('record')
   const [refreshKey, setRefreshKey] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [tournamentStatus, setTournamentStatus] = useState<{
@@ -43,7 +44,7 @@ function App() {
     // Stay on the current tab instead of redirecting to results
   }
 
-  const handleTabChange = (tab: 'import' | 'record' | 'results' | 'flowchart' | 'players' | 'statistics') => {
+  const handleTabChange = (tab: 'import' | 'record' | 'results' | 'flowchart' | 'players' | 'statistics' | 'leaderboard') => {
     setActiveTab(tab)
     setIsMobileMenuOpen(false) // Close mobile menu when tab is selected
   }
@@ -79,12 +80,13 @@ function App() {
                 </div>
               </button>
               <div className="text-lg font-bold text-gray-800">
-                {activeTab === 'record' && '⚔️ Record Match'}
+                {activeTab === 'record' && '➕ Record Match'}
                 {activeTab === 'players' && '👥 Player List'}
-                {activeTab === 'results' && '🏆 View Results'}
+                {activeTab === 'results' && '⚔️ Battles'}
                 {activeTab === 'flowchart' && '🏆 Tournament Bracket'}
                 {activeTab === 'import' && '📥 Import Students'}
                 {activeTab === 'statistics' && '📊 Statistics'}
+                {activeTab === 'leaderboard' && '🥇 Leaderboard'}
               </div>
             </div>
             
@@ -101,7 +103,7 @@ function App() {
                   }`}
                   onClick={() => handleTabChange('record')}
                 >
-                  ⚔️ Record Match
+                  ➕ Record Match
                 </button>
                 <button 
                   className={`w-full text-left px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
@@ -121,7 +123,7 @@ function App() {
                   }`}
                   onClick={() => handleTabChange('results')}
                 >
-                  🏆 View Results
+                  ⚔️ Battles
                 </button>
                 <button 
                   className={`w-full text-left px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
@@ -132,6 +134,16 @@ function App() {
                   onClick={() => handleTabChange('statistics')}
                 >
                   📊 Statistics
+                </button>
+                <button 
+                  className={`w-full text-left px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                    activeTab === 'leaderboard' 
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md' 
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                  onClick={() => handleTabChange('leaderboard')}
+                >
+                    🥇 Leaderboard
                 </button>
                 {/*<button 
                   className={`w-full text-left px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
@@ -167,7 +179,7 @@ function App() {
               }`}
               onClick={() => handleTabChange('record')}
             >
-              ⚔️ Record Match
+              ➕ Record Match
             </button>
             <button 
               className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
@@ -187,7 +199,7 @@ function App() {
               }`}
               onClick={() => handleTabChange('results')}
             >
-              🏆 View Results
+              ⚔️ Battles
             </button>
             <button 
               className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
@@ -198,6 +210,16 @@ function App() {
               onClick={() => handleTabChange('statistics')}
             >
               📊 Statistics
+            </button>
+            <button 
+              className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                activeTab === 'leaderboard' 
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md border-2 border-cyan-500' 
+                  : 'bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-300 shadow-sm'
+              }`}
+              onClick={() => handleTabChange('leaderboard')}
+            >
+                🥇 Leaderboard
             </button>
             {/*<button 
               className={`flex-1 px-3 sm:px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm transition-all duration-200 ${
@@ -275,10 +297,13 @@ function App() {
             <MatchRecorder onMatchRecorded={handleMatchRecorded} />
           )}
           {activeTab === 'results' && (
-            <MatchResults key={refreshKey} />
+            <Battles key={refreshKey} />
           )}
           {activeTab === 'statistics' && (
             <MatchStatistics />
+          )}
+          {activeTab === 'leaderboard' && (
+            <Leaderboard />
           )}
           {/*{activeTab === 'flowchart' && (
             <MatchFlowChart key={refreshKey} />

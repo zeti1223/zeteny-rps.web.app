@@ -14,11 +14,13 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
   const [player2, setPlayer2] = useState<Student | null>(null);
   const [player1Move, setPlayer1Move] = useState<Move | null>(null);
   const [player2Move, setPlayer2Move] = useState<Move | null>(null);
-  const [matchResult, setMatchResult] = useState<MatchResult | ''>('');
+  const [matchResult, setMatchResult] = useState<MatchResult | '' > ('');
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [hasPlayedBefore, setHasPlayedBefore] = useState(false);
   const [checkingMatch, setCheckingMatch] = useState(false);
+  const [isDraw, setIsDraw] = useState(false);
+  const [filterPlayer2ByWinCount, setFilterPlayer2ByWinCount] = useState<number | undefined>(undefined);
 
   // Check for existing match when both players are selected
   useEffect(() => {
@@ -65,16 +67,20 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
     if (player1Move && player2Move) {
       const result = determineWinner(player1Move, player2Move);
       if (result === 'draw') {
-        setMessage('It\'s a draw! Please re-select moves.');
+        setMessage('The result is a draw.');
         setMatchResult('');
+        setIsDraw(true);
       } else {
         setMatchResult(result);
         setMessage('');
+        setIsDraw(false);
       }
+    } else {
+      setIsDraw(false);
     }
   }, [player1Move, player2Move]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, isDrawSubmit: boolean = false) => {
     e.preventDefault();
     
     if (!player1 || !player2) {
@@ -87,7 +93,7 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
       return;
     }
     
-    if (!matchResult) {
+    if (!matchResult && !isDrawSubmit) {
       setMessage('Please select moves for both players');
       return;
     }
@@ -102,7 +108,8 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
         player1Move!,
         player2.id,
         player2.name,
-        player2Move!
+        player2Move!,
+        isDrawSubmit ? 'tie' : 'win'
       );
       
       setMessage('Match recorded successfully!');
@@ -137,7 +144,6 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
     <div className="max-w-5xl mx-auto">
       <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-2xl shadow-xl p-4 sm:p-6">
         <div className="text-center mb-5 sm:mb-6">
-          <div className="text-3xl sm:text-4xl mb-2">⚔️</div>
           <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-1">
             Record Match
           </h2>
@@ -146,7 +152,7 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="space-y-5">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-5">
             {/* Player 1 */}
             <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-2xl border-2 border-blue-100">
@@ -197,7 +203,24 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
                 onStudentSelect={(student) => { setPlayer2(student); setPlayer2Move(null); setMatchResult(''); }}
                 placeholder="Search for Player 2..."
                 selectedStudent={player2}
+                filterByWinCount={filterPlayer2ByWinCount}
               />
+              <div className="mt-2 flex items-center justify-center">
+                <label htmlFor="filterP2" className="mr-2 block text-sm text-gray-900">
+                  Filter by win count:
+                </label>
+                <select
+                  id="filterP2"
+                  value={filterPlayer2ByWinCount === undefined ? '' : filterPlayer2ByWinCount}
+                  onChange={(e) => setFilterPlayer2ByWinCount(e.target.value === '' ? undefined : parseInt(e.target.value, 10))}
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                >
+                  <option value="">All</option>
+                  {[...Array(11).keys()].map(i => (
+                    <option key={i} value={i}>{i}</option>
+                  ))}
+                </select>
+              </div>
               {player2 && (
                 <div className="mt-4">
                   <h4 className="text-sm font-bold text-red-700 mb-2">Choose Move:</h4>
@@ -235,7 +258,8 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t-2 border-gray-100">
             <button 
-              type="submit" 
+              type="button" 
+              onClick={(e) => handleSubmit(e, false)}
               disabled={isLoading || !player1 || !player2 || !matchResult || hasPlayedBefore || checkingMatch}
               className={`flex-1 px-6 py-3 text-white font-bold text-base rounded-xl disabled:cursor-not-allowed transform transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center gap-2 ${hasPlayedBefore 
                   ? 'bg-gradient-to-r from-orange-400 to-red-500 hover:from-orange-500 hover:to-red-600 disabled:from-gray-300 disabled:to-gray-400'
@@ -262,6 +286,26 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
                 </>
               )}
             </button>
+
+            {isDraw && (
+              <button
+                type="button"
+                onClick={(e) => handleSubmit(e, true)}
+                disabled={isLoading || !player1 || !player2 || !isDraw || hasPlayedBefore || checkingMatch}
+                className="flex-1 px-6 py-3 text-white font-bold text-base rounded-xl disabled:cursor-not-allowed transform transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 disabled:from-gray-300 disabled:to-gray-400 hover:shadow-yellow-200"
+              >
+                {isLoading ? (
+                  <>
+                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Recording Draw...
+                  </>
+                ) : (
+                  <>
+                    🤝 Record Draw
+                  </>
+                )}
+              </button>
+            )}
             
             <button 
               type="button" 
@@ -286,7 +330,7 @@ const MatchRecorder: React.FC<MatchRecorderProps> = ({ onMatchRecorded }) => {
               {message}
             </div>
           )}
-        </form>
+        </div>
       </div>
     </div>
   );
